@@ -100,7 +100,7 @@ type config struct {
 	// RPC client options
 	RPCConnect       string                  `short:"c" long:"rpcconnect" description:"Network address of dcrd RPC server"`
 	CAFile           *cfgutil.ExplicitString `long:"cafile" description:"dcrd RPC Certificate Authority"`
-	DisableClientTLS bool                    `long:"noclienttls" description:"Disable TLS for dcrd RPC; only allowed when connecting to localhost"`
+	DisableClientTLS bool                    `long:"noclienttls" description:"Disable TLS for dcrd RPC"`
 	DcrdUsername     string                  `long:"dcrdusername" description:"dcrd RPC username; overrides --username"`
 	DcrdPassword     string                  `long:"dcrdpassword" default-mask:"-" description:"dcrd RPC password; overrides --password"`
 	Proxy            string                  `long:"proxy" description:"Perform dcrd RPC via SOCKS5 proxy (e.g. 127.0.0.1:9050)"`
@@ -616,17 +616,7 @@ func loadConfig(ctx context.Context) (*config, []string, error) {
 	if err != nil {
 		return loadConfigError(err)
 	}
-	if cfg.DisableClientTLS {
-		if _, ok := localhostListeners[RPCHost]; !ok {
-			str := "%s: the --noclienttls option may not be used " +
-				"when connecting RPC to non localhost " +
-				"addresses: %s"
-			err := errors.Errorf(str, funcName, cfg.RPCConnect)
-			fmt.Fprintln(os.Stderr, err)
-			fmt.Fprintln(os.Stderr, usageMessage)
-			return loadConfigError(err)
-		}
-	} else {
+	if !cfg.DisableClientTLS {
 		// If CAFile is unset, choose either the copy or local dcrd cert.
 		if !cfg.CAFile.ExplicitlySet() {
 			cfg.CAFile.Value = filepath.Join(cfg.AppDataDir.Value, defaultCAFilename)
