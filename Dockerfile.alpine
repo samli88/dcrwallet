@@ -38,9 +38,9 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux GO111MODULE=on go install . ./cmd/...
 
 # Production image
-FROM alpine:3.10.1
+FROM alpine:3.10
 
-RUN apk add --no-cache ca-certificates
+RUN apk add --update --no-cache ca-certificates
 COPY --from=0 /go/bin/* /bin/
 
 # mainnet
@@ -52,4 +52,5 @@ EXPOSE 19110 19111
 # simnet
 EXPOSE 19557 19558
 
+# TODO: Fix this, add user / entrypoint script
 ENTRYPOINT "/bin/dcrwallet"
