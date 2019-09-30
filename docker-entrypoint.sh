@@ -10,7 +10,7 @@ fi
 if [ $(echo "$1" | cut -c1) = "-" ] || [ "$1" = "dcrwallet" ]; then
   mkdir -p "$DCRWALLET_DATA"
   chmod 0755 "$DCRWALLET_DATA"
-  chown -R decred "$DCRWALLET_DATA"
+  chown -R decred:decred "$DCRWALLET_DATA"
 
   echo "$0: setting appdata directory to $DCRWALLET_DATA"
 
