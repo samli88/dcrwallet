@@ -116,7 +116,7 @@ type config struct {
 	RPCKey                 *cfgutil.ExplicitString `long:"rpckey" description:"RPC server TLS key"`
 	TLSCurve               *cfgutil.CurveFlag      `long:"tlscurve" description:"Curve to use when generating TLS keypairs"`
 	OneTimeTLSKey          bool                    `long:"onetimetlskey" description:"Generate self-signed TLS keypairs each startup; only write certificate file"`
-	DisableServerTLS       bool                    `long:"noservertls" description:"Disable TLS for the RPC servers; only allowed when binding to localhost"`
+	DisableServerTLS       bool                    `long:"noservertls" description:"Disable TLS for the RPC servers"`
 	GRPCListeners          []string                `long:"grpclisten" description:"Listen for gRPC connections on this interface"`
 	LegacyRPCListeners     []string                `long:"rpclisten" description:"Listen for JSON-RPC connections on this interface"`
 	NoGRPC                 bool                    `long:"nogrpc" description:"Disable gRPC server"`
@@ -718,32 +718,6 @@ func loadConfig(ctx context.Context) (*config, []string, error) {
 					"used as a listener address for both "+
 					"RPC servers", addr)
 				fmt.Fprintln(os.Stderr, err)
-				return loadConfigError(err)
-			}
-		}
-	}
-
-	// Only allow server TLS to be disabled if the RPC server is bound to
-	// localhost addresses.
-	if cfg.DisableServerTLS {
-		allListeners := append(cfg.LegacyRPCListeners, cfg.GRPCListeners...)
-		for _, addr := range allListeners {
-			host, _, err := net.SplitHostPort(addr)
-			if err != nil {
-				str := "%s: RPC listen interface '%s' is " +
-					"invalid: %v"
-				err := errors.Errorf(str, funcName, addr, err)
-				fmt.Fprintln(os.Stderr, err)
-				fmt.Fprintln(os.Stderr, usageMessage)
-				return loadConfigError(err)
-			}
-			if _, ok := localhostListeners[host]; !ok {
-				str := "%s: the --noservertls option may not be used " +
-					"when binding RPC to non localhost " +
-					"addresses: %s"
-				err := errors.Errorf(str, funcName, addr)
-				fmt.Fprintln(os.Stderr, err)
-				fmt.Fprintln(os.Stderr, usageMessage)
 				return loadConfigError(err)
 			}
 		}
